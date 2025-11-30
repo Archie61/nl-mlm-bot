@@ -42,13 +42,11 @@ leads_database = []
 @dp.message(Command("start"))
 async def send_welcome(message: types.Message):
     """Приветственное сообщение"""
-    welcome_text = """
-👋 Добро пожаловать в MLM-Helper!
+    welcome_text = """👋 Добро пожаловать в MLM-Helper!
 
 Я помогаю партнёрам NL International развивать их сетевой бизнес.
 
-Выберите, что вас интересует:
-"""
+Выберите, что вас интересует:"""
     keyboard = types.ReplyKeyboardMarkup(keyboard=[
         [types.KeyboardButton(text="📋 Собрать контакт"), types.KeyboardButton(text="📚 О компании")],
         [types.KeyboardButton(text="💰 Структура доходов"), types.KeyboardButton(text="❓ FAQ")],
@@ -60,8 +58,7 @@ async def send_welcome(message: types.Message):
 @dp.message(Command("help"))
 async def send_help(message: types.Message):
     """Справка по командам"""
-    help_text = """
-📖 **Доступные команды:**
+    help_text = """📖 **Доступные команды:**
 
 /start - Главное меню
 /help - Эта справка
@@ -74,9 +71,28 @@ async def send_help(message: types.Message):
 ✅ Сбор и квалификация потенциальных партнёров
 ✅ Хранение контактов
 ✅ Информация о продуктах
-✅ Поддержка 24/7
-"""
+✅ Поддержка 24/7"""
     await message.answer(help_text)
+
+@dp.message(Command("about"))
+async def cmd_about(message: types.Message):
+    """Информация о компании через команду"""
+    await about_company(message)
+
+@dp.message(Command("income"))
+async def cmd_income(message: types.Message):
+    """Структура доходов через команду"""
+    await income_structure(message)
+
+@dp.message(Command("faq"))
+async def cmd_faq(message: types.Message):
+    """FAQ через команду"""
+    await faq(message)
+
+@dp.message(Command("stats"))
+async def cmd_stats(message: types.Message):
+    """Статистика через команду"""
+    await show_stats(message)
 
 # ============ СБОР ЛИДОВ ============
 
@@ -117,16 +133,14 @@ async def process_interest(message: types.Message, state: FSMContext):
     # Сохраняем в базу
     leads_database.append(data)
     
-    confirmation_text = f"""
-✅ **Спасибо! Ваши данные сохранены:**
+    confirmation_text = f"""✅ **Спасибо! Ваши данные сохранены:**
 
 👤 Имя: {data['name']}
 📞 Телефон: {data['phone']}
 ⭐ Интерес: {data['interest_level']}
 ⏰ Время: {data['timestamp']}
 
-Что дальше?
-"""
+Что дальше?"""
     
     keyboard = types.ReplyKeyboardMarkup(keyboard=[
         [types.KeyboardButton(text="📚 Узнать о компании NL")],
@@ -142,8 +156,7 @@ async def process_interest(message: types.Message, state: FSMContext):
 @dp.message(F.text.in_(["📚 О компании", "📚 Узнать о компании NL"]))
 async def about_company(message: types.Message):
     """Информация о NL International"""
-    about_text = """
-🏢 **NL International**
+    about_text = """🏢 **NL International**
 
 **Кто мы:**
 Международная компания с более чем 30-летним опытом в производстве высокачественной продукции для здоровья и красоты.
@@ -162,12 +175,11 @@ async def about_company(message: types.Message):
 
 **Как начать:**
 1️⃣ Создать аккаунт
-2️⃣ Купить товары для себя/вычета
+2️⃣ Купить товары для себя
 3️⃣ Начать продавать и привлекать партнёров
 4️⃣ Получать доход
 
-Хотите узнать подробнее о доходах?
-"""
+Хотите узнать подробнее о доходах?"""
     keyboard = types.ReplyKeyboardMarkup(keyboard=[
         [types.KeyboardButton(text="💰 Структура доходов")],
         [types.KeyboardButton(text="🎯 Главное меню")]
@@ -177,11 +189,10 @@ async def about_company(message: types.Message):
 
 # ============ СТРУКТУРА ДОХОДОВ ============
 
-@dp.message(F.text.in_(["💰 Структура доходов", "💰 Узнать о доходах"]))
+@dp.message(F.text.in_(["💰 Структура доходов"]))
 async def income_structure(message: types.Message):
     """Информация о структуре доходов"""
-    income_text = """
-💰 **СТРУКТУРА ДОХОДОВ NL INTERNATIONAL**
+    income_text = """💰 **СТРУКТУРА ДОХОДОВ NL INTERNATIONAL**
 
 **СТРОКА 1: ЛИЧНЫЕ ПРОДАЖИ**
 📊 До 15% комиссии от всех ваших продаж
@@ -204,8 +215,7 @@ async def income_structure(message: types.Message):
 
 При расширении структуры до 50 человек доход может составить 50,000+ руб/месяц!
 
-👉 Готовы начать?
-"""
+👉 Готовы начать?"""
     keyboard = types.ReplyKeyboardMarkup(keyboard=[
         [types.KeyboardButton(text="✅ Хочу начать")],
         [types.KeyboardButton(text="❓ Ещё вопросы")],
@@ -219,8 +229,7 @@ async def income_structure(message: types.Message):
 @dp.message(F.text.in_(["❓ FAQ", "❓ Ещё вопросы"]))
 async def faq(message: types.Message):
     """Часто задаваемые вопросы"""
-    faq_text = """
-❓ **ЧАСТО ЗАДАВАЕМЫЕ ВОПРОСЫ**
+    faq_text = """❓ **ЧАСТО ЗАДАВАЕМЫЕ ВОПРОСЫ**
 
 **Q: Нужны ли мне деньги для старта?**
 A: Нет, вы можете начать без вложений. Товары можно покупать постепенно.
@@ -243,8 +252,7 @@ A: Даже небольшие продажи приносят доход. Гл�
 **Q: Какой минимальный заказ?**
 A: От 1,500 рублей на первый заказ.
 
-Ещё есть вопросы? Свяжитесь с менеджером! 📞
-"""
+Ещё есть вопросы? Свяжитесь с менеджером! 📞"""
     keyboard = types.ReplyKeyboardMarkup(keyboard=[
         [types.KeyboardButton(text="💬 Связаться с менеджером")],
         [types.KeyboardButton(text="🎯 Главное меню")]
@@ -254,13 +262,12 @@ A: От 1,500 рублей на первый заказ.
 
 # ============ СТАТИСТИКА ============
 
-@dp.message(F.text.in_(["📊 Мои лиды", "📊 Статистика"]))
+@dp.message(F.text.in_(["📊 Мои лиды"]))
 async def show_stats(message: types.Message):
     """Показать статистику собранных лидов"""
     user_leads = [lead for lead in leads_database if lead['user_id'] == message.from_user.id]
     
-    stats_text = f"""
-📊 **ВАША СТАТИСТИКА**
+    stats_text = f"""📊 **ВАША СТАТИСТИКА**
 
 Всего собрано лидов: {len(user_leads)}
 
@@ -272,8 +279,7 @@ async def show_stats(message: types.Message):
         medium_interest = len([l for l in user_leads if "Средний" in l.get('interest_level', '')])
         low_interest = len([l for l in user_leads if "Низкий" in l.get('interest_level', '')])
         
-        stats_text += f"""
-🔥 Высокий интерес: {high_interest}
+        stats_text += f"""🔥 Высокий интерес: {high_interest}
 ⭐ Средний интерес: {medium_interest}
 📌 Низкий интерес: {low_interest}
 
@@ -296,8 +302,7 @@ async def show_stats(message: types.Message):
 @dp.message(F.text.in_(["💬 Связаться с менеджером", "⚙️ Помощь"]))
 async def contact_manager(message: types.Message):
     """Контактная информация"""
-    contact_text = """
-📞 **СВЯЖИТЕСЬ С МЕНЕДЖЕРОМ**
+    contact_text = """📞 **СВЯЖИТЕСЬ С МЕНЕДЖЕРОМ**
 
 **Телефон:** +7 (800) 555-35-35
 **WhatsApp:** +7 (918) 555-35-35
@@ -313,8 +318,7 @@ async def contact_manager(message: types.Message):
 ✅ Поможет с регистрацией
 ✅ Подберёт оптимальный пакет
 
-Напишите менеджеру прямо сейчас! 💬
-"""
+Напишите менеджеру прямо сейчас! 💬"""
     keyboard = types.ReplyKeyboardMarkup(keyboard=[
         [types.KeyboardButton(text="🎯 Главное меню")]
     ], resize_keyboard=True)
@@ -328,13 +332,12 @@ async def main_menu(message: types.Message):
     """Вернуться в главное меню"""
     await send_welcome(message)
 
-# ============ ОСТАЛЬНОЕ ============
+# ============ НАЧАТЬ РАБОТУ ============
 
 @dp.message(F.text == "✅ Хочу начать")
 async def want_to_start(message: types.Message):
     """Пользователь хочет начать"""
-    start_text = """
-🎉 **ОТЛИЧНО! ДАВАЙТЕ НАЧНЁМ!**
+    start_text = """🎉 **ОТЛИЧНО! ДАВАЙТЕ НАЧНЁМ!**
 
 Чтобы зарегистрироваться в системе:
 
@@ -343,8 +346,7 @@ async def want_to_start(message: types.Message):
 3️⃣ Выберите пакет на старт
 4️⃣ Начните зарабатывать!
 
-Нужна помощь менеджера? Нажмите кнопку ниже ⬇️
-"""
+Нужна помощь менеджера? Нажмите кнопку ниже ⬇️"""
     keyboard = types.ReplyKeyboardMarkup(keyboard=[
         [types.KeyboardButton(text="💬 Связаться с менеджером")],
         [types.KeyboardButton(text="🎯 Главное меню")]
@@ -352,16 +354,16 @@ async def want_to_start(message: types.Message):
     
     await message.answer(start_text, reply_markup=keyboard)
 
+# ============ ОСТАЛЬНОЕ ============
+
 @dp.message()
 async def echo(message: types.Message):
     """Ответ на неизвестные сообщения"""
-    echo_text = """
-Я не совсем вас понял. 🤔
+    echo_text = """Я не совсем вас понял. 🤔
 
 Выберите опцию из меню или напишите:
 /help - для справки
-/start - для главного меню
-"""
+/start - для главного меню"""
     keyboard = types.ReplyKeyboardMarkup(keyboard=[
         [types.KeyboardButton(text="📋 Собрать контакт"), types.KeyboardButton(text="📚 О компании")],
         [types.KeyboardButton(text="💰 Структура доходов"), types.KeyboardButton(text="❓ FAQ")],
