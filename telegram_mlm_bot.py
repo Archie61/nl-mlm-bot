@@ -1,9 +1,10 @@
 # Telegram MLM-Bot для NL International (aiogram 3.x)
 # Установить: pip install aiogram
-# Использование: python telegram_mlm_bot_v3.py
+# Использование: python telegram_mlm_bot.py
 
 import asyncio
 import logging
+import os
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.state import State, StatesGroup
@@ -14,7 +15,10 @@ from aiogram.client.default import DefaultBotProperties
 from datetime import datetime
 
 # Конфигурация
-API_TOKEN = '8523840701:AAE0sEIHd4wD5pOcR7v00KDl2eld6mhHtgA'  # Замените на ваш токен от BotFather
+API_TOKEN = os.getenv('BOT_TOKEN')  # Получаем токен из переменной окружения
+if not API_TOKEN:
+    raise ValueError("BOT_TOKEN не установлен! Установите переменную окружения BOT_TOKEN")
+
 logging.basicConfig(level=logging.INFO)
 
 # Инициализация бота
