@@ -1,7 +1,9 @@
 import logging
 from aiogram import Bot, Dispatcher, F, types
-from aiogram.filters import Command
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
+from aiogram.filters import Command, StateFilter
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
+from aiogram.types import KeyboardButton
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 import asyncio
 from dotenv import load_dotenv
@@ -19,6 +21,11 @@ logger = logging.getLogger(__name__)
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
+# === СОСТОЯНИЯ ===
+class MenuStates(StatesGroup):
+    main_menu = State()
+    in_section = State()
+
 # === КЛАВИАТУРЫ ===
 
 def get_main_menu():
@@ -33,7 +40,7 @@ def get_main_menu():
     return keyboard.as_markup(resize_keyboard=True)
 
 def get_back_menu():
-    """Меню с кнопкой назад (только главное меню)"""
+    """Меню с кнопкой назад"""
     keyboard = ReplyKeyboardBuilder()
     keyboard.row(KeyboardButton(text="🏠 Главное меню"))
     keyboard.adjust(1)
@@ -42,8 +49,9 @@ def get_back_menu():
 # === СТАРТОВЫЙ ОБРАБОТЧИК ===
 
 @dp.message(Command("start"))
-async def start_handler(message: types.Message):
+async def start_handler(message: types.Message, state: FSMContext):
     """Обработчик команды /start"""
+    await state.set_state(MenuStates.main_menu)
     welcome_text = """
 🌟 **Добро пожаловать в NL MLM Helper!** 🌟
 
@@ -53,11 +61,12 @@ async def start_handler(message: types.Message):
     """
     await message.answer(welcome_text, reply_markup=get_main_menu(), parse_mode="Markdown")
 
-# === ОБРАБОТЧИКИ МЕНЮ ===
+# === ОБРАБОТЧИКИ МЕНЮ (MAIN STATE) ===
 
-@dp.message(F.text == "📱 О компании")
-async def about_company(message: types.Message):
+@dp.message(MenuStates.main_menu, F.text == "📱 О компании")
+async def about_company(message: types.Message, state: FSMContext):
     """О компании"""
+    await state.set_state(MenuStates.in_section)
     text = """
 **📱 О компании NL International**
 
@@ -80,9 +89,10 @@ NL International — это международная компания с бо�
     """
     await message.answer(text, reply_markup=get_back_menu(), parse_mode="Markdown")
 
-@dp.message(F.text == "💰 Структура доходов")
-async def income_structure(message: types.Message):
+@dp.message(MenuStates.main_menu, F.text == "💰 Структура доходов")
+async def income_structure(message: types.Message, state: FSMContext):
     """Структура доходов"""
+    await state.set_state(MenuStates.in_section)
     text = """
 **💰 Структура доходов NL International**
 
@@ -110,9 +120,10 @@ async def income_structure(message: types.Message):
     """
     await message.answer(text, reply_markup=get_back_menu(), parse_mode="Markdown")
 
-@dp.message(F.text == "🚀 Как начать")
-async def how_to_start(message: types.Message):
+@dp.message(MenuStates.main_menu, F.text == "🚀 Как начать")
+async def how_to_start(message: types.Message, state: FSMContext):
     """Как начать"""
+    await state.set_state(MenuStates.in_section)
     text = """
 **🚀 Как начать зарабатывать?**
 
@@ -145,9 +156,10 @@ async def how_to_start(message: types.Message):
     """
     await message.answer(text, reply_markup=get_back_menu(), parse_mode="Markdown")
 
-@dp.message(F.text == "❓ F.A.Q")
-async def faq(message: types.Message):
+@dp.message(MenuStates.main_menu, F.text == "❓ F.A.Q")
+async def faq(message: types.Message, state: FSMContext):
     """F.A.Q"""
+    await state.set_state(MenuStates.in_section)
     text = """
 **❓ Часто задаваемые вопросы**
 
@@ -176,9 +188,10 @@ async def faq(message: types.Message):
     """
     await message.answer(text, reply_markup=get_back_menu(), parse_mode="Markdown")
 
-@dp.message(F.text == "📞 Контакты")
-async def contacts(message: types.Message):
+@dp.message(MenuStates.main_menu, F.text == "📞 Контакты")
+async def contacts(message: types.Message, state: FSMContext):
     """Контакты"""
+    await state.set_state(MenuStates.in_section)
     text = """
 **📞 Контактная информация**
 
@@ -208,20 +221,30 @@ Telegram: @nlmlm_helper
     """
     await message.answer(text, reply_markup=get_back_menu(), parse_mode="Markdown")
 
+# === ОБРАБОТЧИК ВОЗВРАТА В ГЛАВНОЕ МЕНЮ ===
+
 @dp.message(F.text == "🏠 Главное меню")
-async def back_to_main(message: types.Message):
+async def back_to_main(message: types.Message, state: FSMContext):
     """Возврат в главное меню"""
+    await state.set_state(MenuStates.main_menu)
     await message.answer("Вы в главном меню. Выберите раздел:", reply_markup=get_main_menu())
 
 # === ОБРАБОТЧИК НЕИЗВЕСТНЫХ КОМАНД ===
 
 @dp.message()
-async def echo(message: types.Message):
+async def echo(message: types.Message, state: FSMContext):
     """Обработчик всех остальных сообщений"""
-    await message.answer(
-        "🤔 Я не совсем вас понял.\n\nПожалуйста, используйте кнопки меню ниже:",
-        reply_markup=get_main_menu()
-    )
+    current_state = await state.get_state()
+    if current_state == MenuStates.main_menu:
+        await message.answer(
+            "🤔 Я не совсем вас понял.\n\nПожалуйста, используйте кнопки меню ниже:",
+            reply_markup=get_main_menu()
+        )
+    else:
+        await message.answer(
+            "🤔 Я не совсем вас понял.\n\nПожалуйста, используйте кнопки меню ниже:",
+            reply_markup=get_back_menu()
+        )
 
 # === ЗАПУСК БОТА ===
 
