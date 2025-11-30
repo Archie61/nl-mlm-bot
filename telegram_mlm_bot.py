@@ -51,7 +51,7 @@ async def send_welcome(message: types.Message):
 """
     keyboard = types.ReplyKeyboardMarkup(keyboard=[
         [types.KeyboardButton(text="📋 Собрать контакт"), types.KeyboardButton(text="📚 О компании")],
-        [types.KeyboardButton(text="💰 Структура дохода"), types.KeyboardButton(text="❓ FAQ")],
+        [types.KeyboardButton(text="💰 Структура доходов"), types.KeyboardButton(text="❓ FAQ")],
         [types.KeyboardButton(text="📊 Мои лиды"), types.KeyboardButton(text="⚙️ Помощь")]
     ], resize_keyboard=True)
     
@@ -177,7 +177,7 @@ async def about_company(message: types.Message):
 
 # ============ СТРУКТУРА ДОХОДОВ ============
 
-@dp.message(F.text.in_(["💰 Структура дохода", "💰 Узнать о доходах"]))
+@dp.message(F.text.in_(["💰 Структура доходов", "💰 Узнать о доходах"]))
 async def income_structure(message: types.Message):
     """Информация о структуре доходов"""
     income_text = """
@@ -364,7 +364,7 @@ async def echo(message: types.Message):
 """
     keyboard = types.ReplyKeyboardMarkup(keyboard=[
         [types.KeyboardButton(text="📋 Собрать контакт"), types.KeyboardButton(text="📚 О компании")],
-        [types.KeyboardButton(text="💰 Структура дохода"), types.KeyboardButton(text="❓ FAQ")],
+        [types.KeyboardButton(text="💰 Структура доходов"), types.KeyboardButton(text="❓ FAQ")],
         [types.KeyboardButton(text="🎯 Главное меню")]
     ], resize_keyboard=True)
     
